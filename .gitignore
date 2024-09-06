@@ -12,3 +12,4 @@ tmp
 .npmrc
 
 dist
+tsconfig.tsbuildinfo
