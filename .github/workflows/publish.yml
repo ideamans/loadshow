@@ -1,0 +1,28 @@
+name: Publishing
+on:
+  push:
+    branches:
+      - main
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: FedericoCarboni/setup-ffmpeg@v3
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - name: Install modules
+        run: yarn install
+      - name: Building & Testing
+        run: |
+          yarn build
+          yarn test
+      - name: Publishing
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
