@@ -32,7 +32,7 @@ loadshow record https://apple.com/ ./loadshow.mp4
 
 上記のコマンドは、`https://apple.com/`の読み込み過程を記録した`./loadshow.mp4`を作成します。
 
-<video src="https://github.com/ideamans/loadshow/raw/master/readme/apple.com.mp4" muted autoplay playsinline></video>
+https://github.com/ideamans/loadshow/raw/main/readme/apple.com.mp4
 
 ### 動画の比較
 
@@ -44,7 +44,7 @@ loadshow juxtapose -o compare.mp4 apple.com.mp4 microsoft.com.mp4
 
 上記のコマンドは、`apple.com.mp4`と`microsoft.com.mp4`を左右に配置し、`-o`オプションに指定した`compare.mp4`として出力します。
 
-<video src="https://github.com/ideamans/loadshow/raw/master/readme/compare.mp4" muted autoplay playsinline></video>
+https://github.com/ideamans/loadshow/raw/main/readme/compare.mp4
 
 ## TIPS
 
