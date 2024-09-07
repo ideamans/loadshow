@@ -14,6 +14,7 @@
 ### 必要なソフトウェア
 
 - Node.js >= 20
+- Google Chrome (またはChromium)
 - ffmpeg
 
 ### インストール
@@ -53,16 +54,25 @@ loadshow juxtapose -o compare.mp4 apple.com.mp4 microsoft.com.mp4
 次の項目を環境変数で指定できます。
 
 - `LOG_LEVEL` ログレベル (`fatal` | `warn` | `error` | `info` | `debug` | `fatal`) デフォルト値 `info`
-- `FFMPEG_PATH` ffmpegのパス (例 `/opt/homebrew/bin/ffmpeg`) デフォルト値 `ffmpeg`
 - `CHROME_PATH` Chromeのパス (例 `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`)
+- `FFMPEG_PATH` ffmpegのパス (例 `/opt/homebrew/bin/ffmpeg`) デフォルト値 `ffmpeg` (Windowsの場合 `ffmpeg.exe`)
 - `LC_ALL` or `LC_MESSAGES` or `LANG` 情報バナーのロケール (例 `ja-JP`)
 - `TZ` 情報バナーのタイムゾーン (例 `Asia/Tokyo`)
 
-`CHROME_PATH`は指定しなければ`puppeteer`のデフォルトブラウザを使用します。Chromeを用いる場合は以下の値を参考にしてください。
+### 外部アプリケーションのパス
+
+loadshowの実行にはGoogle Chromeとffmpegが必要です。
+
+環境変数`CHROME_PATH`の指定がなければ、プラットフォームに応じた代表的なChromeのパスを推測します。
 
 - MacOS `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`
 - Windows `C:\Program Files\Google\Chrome\Application\chrome.exe`
 - Linux `/usr/bin/google-chrome`
+
+> [!NOTE]
+> `puppeteer`と同時にインストールされるChromeでは、現時点では正常に動作しないためChromeの事前インストールを必要とします(後述)。
+
+ffmpegは`PATH`が通っていれば`FFMPEG_PATH`の指定は不要です。
 
 ### 動画の仕様とカスタマイズ
 
@@ -215,3 +225,9 @@ yarn test
 ```bash
 yarn adhoc
 ```
+
+### 残課題
+
+- `puppeteer`と同時にインストールされる`Google Chrome for Testing`をGoogle Chromeとして利用する。
+  - その方がセットアップが楽。
+  - しかし現時点では`Google Chrome for Testing`では縦長のような柔軟なビューポートを制御できない問題がある。そのため事前にインストールされた通常のChromeを必要としている。

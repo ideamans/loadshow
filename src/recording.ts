@@ -1,4 +1,4 @@
-import { Page, PuppeteerLaunchOptions } from 'puppeteer'
+import { Page, PuppeteerLaunchOptions } from 'puppeteer-core'
 
 import { DeepPartial, DependencyInterface, FrameFormat } from './types.js'
 
@@ -33,7 +33,7 @@ export function defaultRecordingSpec(): RecordingSpec {
     viewportWidth: 375, // Viewport width in pixels
     timeoutMs: 30 * 1000, // Navigation timeout in milliseconds
     puppeteer: {
-      headless: 'new',
+      headless: true,
       // executablePath:
       //   process.env.CHROME_PATH ||
       //   (process.platform === 'win32'
