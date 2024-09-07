@@ -1,10 +1,11 @@
 import Fsp from 'fs/promises'
 
+import { Browser, ChromeReleaseChannel, computeSystemExecutablePath } from '@puppeteer/browsers'
 import { execa } from 'execa'
 import ImageSize from 'image-size'
 import NodeHtmlToImage from 'node-html-to-image'
 import Pino from 'pino'
-import Puppeteer, { LaunchOptions, Page } from 'puppeteer'
+import Puppeteer, { LaunchOptions, Page } from 'puppeteer-core'
 
 import { CommandOutput, DependencyInterface } from './types.js'
 
@@ -57,7 +58,9 @@ export class Dependency implements DependencyInterface {
 
   async ffmpeg(args: string[]): Promise<CommandOutput> {
     this.logger?.trace({ args }, `Executing ffmpeg`)
-    const output = await execa(process.env.FFMPEG_PATH || 'ffmpeg', args, {
+    let ffmpegPath = process.env.FFMPEG_PATH || 'ffmpeg'
+    if (process.platform === 'win32') ffmpegPath += '.exe'
+    const output = await execa(ffmpegPath, args, {
       reject: false,
     })
     return {
@@ -74,6 +77,11 @@ export class Dependency implements DependencyInterface {
     }
     if (process.env.CHROME_PATH) {
       options.executablePath = process.env.CHROME_PATH
+    } else {
+      options.executablePath = await computeSystemExecutablePath({
+        browser: Browser.CHROME,
+        channel: ChromeReleaseChannel.STABLE,
+      })
     }
     const browser = await Puppeteer.launch(options)
     const page = await browser.newPage()

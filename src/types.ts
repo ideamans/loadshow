@@ -1,5 +1,5 @@
 import Pino from 'pino'
-import { LaunchOptions, Page } from 'puppeteer'
+import { LaunchOptions, Page } from 'puppeteer-core'
 
 // Common types and interfaces
 
