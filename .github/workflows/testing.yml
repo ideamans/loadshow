@@ -5,7 +5,7 @@ on:
       - main
 
 jobs:
-  publish:
+  testing:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -23,7 +23,3 @@ jobs:
         run: yarn install
       - name: Building & Testing
         run: yarn test
-      - name: Publishing
-        run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
