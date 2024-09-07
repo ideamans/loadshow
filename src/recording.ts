@@ -151,6 +151,10 @@ export async function recordPageLoading(
     dependency.logger?.debug({}, `Creating CDP session in puppeteer`)
     const cdp = await page.createCDPSession()
 
+    // It seems to be good to set window bounds after viewport setting
+    const { windowId } = await cdp.send('Browser.getWindowForTarget')
+    await cdp.send('Browser.setWindowBounds', { windowId, bounds: viewport })
+
     // Network settings
     dependency.logger?.debug({}, `Setting up network conditions via CDP`)
     await cdp.send('Network.enable')
