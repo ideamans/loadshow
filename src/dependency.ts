@@ -5,9 +5,10 @@ import { execa } from 'execa'
 import ImageSize from 'image-size'
 import NodeHtmlToImage from 'node-html-to-image'
 import Pino from 'pino'
-import Puppeteer, { LaunchOptions, Page } from 'puppeteer'
+import Puppeteer, { PuppeteerLaunchOptions } from 'puppeteer'
+import PuppeteerCore, { PuppeteerLaunchOptions as CorePuppeteerLaunchOptions } from 'puppeteer-core'
 
-import { CommandOutput, DependencyInterface } from './types.js'
+import { CommandOutput, DependencyInterface, DualLaunchOptions, DualPage } from './types.js'
 
 export class Dependency implements DependencyInterface {
   logger!: Pino.Logger
@@ -70,19 +71,19 @@ export class Dependency implements DependencyInterface {
   }
 
   async withPuppeteer(
-    preferSystemChrome: boolean,
-    puppeteerOptions: LaunchOptions,
-    cb: (page: Page) => Promise<void>
+    puppeteerOptions: DualLaunchOptions,
+    cb: (page: DualPage) => Promise<void>,
+    _?: boolean
   ): Promise<void> {
     // Launch puppeteer and allow to manipulate the page tab
-    const options = {
+    const options: DualLaunchOptions = {
       ...puppeteerOptions,
     }
 
     if (process.env.CHROME_PATH) {
       this.logger?.debug({}, `Using CHROME_PATH=${process.env.CHROME_PATH} as the browser`)
       options.executablePath = process.env.CHROME_PATH
-    } else if (preferSystemChrome) {
+    } else {
       const systemChrome = await computeSystemExecutablePath({
         browser: Browser.CHROME,
         channel: ChromeReleaseChannel.STABLE,
@@ -91,11 +92,13 @@ export class Dependency implements DependencyInterface {
         this.logger?.debug({}, `Using browser system chrome: ${systemChrome} as the browser`)
         options.executablePath = systemChrome
       }
-    } else {
-      this.logger?.debug({}, `Using puppeteer's bundled chrome as the browser`)
     }
 
-    const browser = await Puppeteer.launch(options)
+    if (!options.executablePath) {
+      throw new Error(`No executable path for the browser`)
+    }
+
+    const browser = await PuppeteerCore.launch(options as CorePuppeteerLaunchOptions)
     const page = await browser.newPage()
     await cb(page)
     await page.close()
@@ -117,5 +120,40 @@ export class Dependency implements DependencyInterface {
         else ok({ width, height })
       })
     })
+  }
+}
+
+export class DependencyWithPuppeteer extends Dependency {
+  async withPuppeteer(
+    puppeteerOptions: DualLaunchOptions,
+    cb: (page: DualPage) => Promise<void>,
+    preferSystemChrome: boolean
+  ): Promise<void> {
+    // Launch puppeteer and allow to manipulate the page tab
+    const options: DualLaunchOptions = {
+      ...puppeteerOptions,
+    }
+
+    if (process.env.CHROME_PATH) {
+      this.logger?.debug({}, `Using CHROME_PATH=${process.env.CHROME_PATH} as the browser`)
+      options.executablePath = process.env.CHROME_PATH
+    } else if (preferSystemChrome) {
+      const systemChrome = await computeSystemExecutablePath({
+        browser: Browser.CHROME,
+        channel: ChromeReleaseChannel.STABLE,
+      })
+      if (systemChrome) {
+        this.logger?.debug({}, `Using browser system chrome: ${systemChrome} as the browser`)
+        options.executablePath = systemChrome
+      }
+    } else {
+      this.logger?.debug({}, `Using puppeteer's bundled chrome as the browser`)
+    }
+
+    const browser = await Puppeteer.launch(options as PuppeteerLaunchOptions)
+    const page = await browser.newPage()
+    await cb(page)
+    await page.close()
+    await browser.close()
   }
 }
