@@ -1,7 +1,11 @@
 import Pino from 'pino'
-import { LaunchOptions, Page } from 'puppeteer'
+import { Page, PuppeteerLaunchOptions } from 'puppeteer'
+import { Page as CorePage, PuppeteerLaunchOptions as CorePuppeteerLaunchOptions } from 'puppeteer-core'
 
 // Common types and interfaces
+
+export type DualLaunchOptions = CorePuppeteerLaunchOptions | PuppeteerLaunchOptions
+export type DualPage = Page | CorePage
 
 export interface CommandOutput {
   exitCode: number
@@ -18,9 +22,9 @@ export interface DependencyInterface {
   writeFile(filePath: string, buffer: Buffer): Promise<void>
   mkdirp(dirPath: string, recreate?: boolean): Promise<void>
   withPuppeteer(
-    preferSystemChrome: boolean,
-    puppeteerOptions: LaunchOptions,
-    cb: (page: Page) => Promise<void>
+    puppeteerOptions: DualLaunchOptions,
+    cb: (page: DualPage) => Promise<void>,
+    preferSystemChrome?: boolean
   ): Promise<void>
   htmlToImage(html: string, outputFilePath: string): Promise<void>
   imageDimensions(imageFilePath: string): Promise<{ width: number; height: number }>

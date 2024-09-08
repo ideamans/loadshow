@@ -6,7 +6,7 @@ import { Command } from 'commander'
 import Tmp from 'tmp-promise'
 import Yaml from 'yaml'
 
-import { Dependency } from './dependency.js'
+import { Dependency, DependencyWithPuppeteer } from './dependency.js'
 import { runJuxtapose } from './juxtapose.js'
 import { defaultLoadshowSpec, LoadshowInput, mergeLoadshowSpec, runLoadshow } from './loadshow.js'
 import { mergeDeepProperties, parseSpecPhrase, SpecObject, updateDeepProperty } from './spec.js'
@@ -17,6 +17,10 @@ function helpAndExit(cmd: Command, message: string) {
   console.error(message)
   cmd.outputHelp()
   process.exit(1)
+}
+
+function createDependency() {
+  return process.env.BARE_PUPPETEER ? new DependencyWithPuppeteer() : new Dependency()
 }
 
 const record = program
@@ -32,7 +36,7 @@ const record = program
       helpAndExit(record, 'URL and artifactsDir are required')
     }
 
-    const dependency = new Dependency()
+    const dependency = createDependency()
 
     const userSpec: SpecObject = {}
     const defaultSpec = defaultLoadshowSpec()
@@ -99,7 +103,7 @@ const juxtapose = program
 
     const outputFilePath = output as string
 
-    const dependency = new Dependency()
+    const dependency = createDependency()
     await runJuxtapose(
       {
         inputFilePaths,
