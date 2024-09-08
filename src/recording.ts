@@ -1,4 +1,4 @@
-import { Page, PuppeteerLaunchOptions } from 'puppeteer-core'
+import { Page, PuppeteerLaunchOptions } from 'puppeteer'
 
 import { DeepPartial, DependencyInterface, FrameFormat } from './types.js'
 
@@ -12,6 +12,7 @@ export interface RecordingSpec {
   headers: { [key: string]: string }
   viewportWidth: number
   timeoutMs: number
+  preferSystemChrome: boolean
   puppeteer: PuppeteerLaunchOptions
 }
 
@@ -32,8 +33,9 @@ export function defaultRecordingSpec(): RecordingSpec {
     },
     viewportWidth: 375, // Viewport width in pixels
     timeoutMs: 30 * 1000, // Navigation timeout in milliseconds
+    preferSystemChrome: false, // Use system Chrome if available
     puppeteer: {
-      headless: true,
+      headless: 'new',
       // executablePath:
       //   process.env.CHROME_PATH ||
       //   (process.platform === 'win32'
@@ -51,7 +53,7 @@ export function defaultRecordingSpec(): RecordingSpec {
         // '--no-zygote',
         // '--single-process',
         // '--disable-gpu',
-        '--incognito',
+        // '--incognito',
         '--hide-scrollbars',
       ],
     },
@@ -137,7 +139,7 @@ export async function recordPageLoading(
   let startedAt: number
 
   dependency.logger?.debug({}, `Launching puppeteer`)
-  await dependency.withPuppeteer(input.puppeteer, async (page: Page) => {
+  await dependency.withPuppeteer(input.preferSystemChrome, input.puppeteer, async (page: Page) => {
     dependency.logger?.debug({}, `Setting up viewport and headers`)
     const deviceScaleFactor = input.screen.width / input.viewportWidth
     const viewport = {
