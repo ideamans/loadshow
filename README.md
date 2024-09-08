@@ -78,21 +78,20 @@ layout:
   outdent: 20 # 第一カラムの下方の余白
   progressHeight: 16 # プログレスバーの幅
 recording:
-    network: # ネットワーク設定
-      latencyMs: 20 # レイテンシー (単位 ms)
-      downloadThroughputMbps: 10 # ダウンロードスループット (単位 Mbps)
-      uploadThroughputMbps: 10 # アップロードスループット (単位 Mbps)
-    },
-    cpuThrottling: 4 # CPUスロットリング (スマホ相当にするため4 = 性能1/4)
-    headers: # HTTPリクエストヘッダ
-    viewportWidth: 375 # ビューポート幅
-    timeoutMs: 30000 # タイムアウト (単位 ms)
-    preferSystemChrome: false # Puppeteerバンドルのブラウザではなくインストール済みChromeを優先
-    puppeteer: # puppeteerの設定 `PuppeteerLaunchOptions`
-      headless: 'new',
-      args: # 文字列
-        - '--incognito'
-        - '--hide-scrollbars'
+  network: # ネットワーク設定
+    latencyMs: 20 # レイテンシー (単位 ms)
+    downloadThroughputMbps: 10 # ダウンロードスループット (単位 Mbps)
+    uploadThroughputMbps: 10 # アップロードスループット (単位 Mbps)
+  },
+  cpuThrottling: 4 # CPUスロットリング (スマホ相当にするため4 = 性能1/4)
+  headers: # HTTPリクエストヘッダ
+  viewportWidth: 375 # ビューポート幅
+  timeoutMs: 30000 # タイムアウト (単位 ms)
+  preferSystemChrome: false # Puppeteerバンドルのブラウザではなくインストール済みChromeを優先
+  puppeteer: # puppeteerの設定 `PuppeteerLaunchOptions`
+    headless: 'new',
+    args: # 文字列
+      - '--hide-scrollbars'
 banner: # 情報バナー
   templateFilePath: "" # HTMLテンプレート (ファイル指定)
   htmlTemplate: "" # HTMLテンプレート (テキスト指定)
@@ -193,6 +192,10 @@ loadshow record -u "banner.vars.credit=My Loadshow!" https://apple.com/ ./loadsh
 
 詳しくは`src/banner.ts`を参照してください。
 
+### 苦手なページ
+
+内部的には縦長のウィンドウを作成し、動画の記録を行っています。そのため全面背景のようにウィンドウの高さを基準にしたCSSを利用しているページでは、表示が崩れる場合があります。
+
 ### API
 
 プログラムの一部として呼び出すには以下のように記述します。
@@ -276,6 +279,4 @@ yarn adhoc
 
 ### 残課題
 
-- `puppeteer`と同時にインストールされる`Google Chrome for Testing`をGoogle Chromeとして利用する。
-  - その方がセットアップが楽。
-  - しかし現時点では`Google Chrome for Testing`では縦長のような柔軟なビューポートを制御できない問題がある。そのため事前にインストールされた通常のChromeを必要としている。
+- テストとかかなり適当。
