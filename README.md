@@ -142,6 +142,57 @@ layout:
 - Windows `C:\Program Files\Google\Chrome\Application\chrome.exe`
 - Linux `/usr/bin/google-chrome`
 
+### 情報バナーのカスタマイズ - 表示内容
+
+動画の上部に表示される情報バナーは、HTMLテンプレート([handlebars](https://handlebarsjs.com/))の変数を書き換えることによりカスタマイズできます。
+
+変数自体がテンプレートとして振る舞うので、`{{ }}`などの記号を記述することで他の変数を参照できます。
+
+```yaml
+# システムから渡される変数
+width: 動画の幅
+url: 記録しているURL
+htmlTitle: HTMLタイトル
+timestampMs: 記録を行った日時のタイムスタンプ(単位 ms)
+resourceSizeBytes: リソースサイズ
+onLoadTimeMs: 読み込み時間(OnLoad 単位 ms)
+
+# 組み込みヘルパー
+datetime: ロケールに合わせた日時タイムスタンプの整形
+mb: リソースサイズをMB単位に整形
+msToSec: msを秒に整形
+i18n: 一部の用語を翻訳
+```
+
+仕様オプション`banner.vars`以下の値を変更することでカスタマイズできます。
+
+```yaml
+banner:
+  vars:
+    mainTitle: "{{htmlTitle}}"
+    subTitle: "{{url}}"
+    credit: "loadshow"
+    createdAt: "{{datetime timestampMs}}"
+    resourceSizeLabel: "Resource Size"
+    resourceSizeValue: "{{mb resourceSizeBytes}}"
+    onLoadTimeLabel: "OnLoad Time"
+    onLoadTimeValue: "{{msToSec onLoadTimeMs}}"
+```
+
+例えば`loadshow`というクレジット表記を変更するには、次のようにコマンドを実行します。
+
+```bash
+loadshow record -u "banner.vars.credit=My Loadshow!" https://apple.com/ ./loadshow.mp4
+```
+
+### 情報バナーのカスタマイズ - テンプレートの変更
+
+仕様オプション`banner.templateFilePath`にHTMLテンプレートのパスを指定することで、テンプレート自体を変更できます。
+
+あるいは`banner.htmlTemplate`にHTMLテンプレートを直接指定することもできます。この利用方法はYAMLファイルによる仕様の指定を想定しています。
+
+詳しくは`src/banner.ts`を参照してください。
+
 ### API
 
 プログラムの一部として呼び出すには以下のように記述します。
