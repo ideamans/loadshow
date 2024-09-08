@@ -14,6 +14,7 @@
 ### 必要なソフトウェア
 
 - Node.js >= 20
+- Chrome または Chromium
 - ffmpeg
 
 ### インストール
@@ -57,6 +58,7 @@ loadshow juxtapose -o compare.mp4 apple.com.mp4 microsoft.com.mp4
 - `FFMPEG_PATH` ffmpegのパス (例 `/opt/homebrew/bin/ffmpeg`) デフォルト値 `ffmpeg` (Windowsの場合 `ffmpeg.exe`)
 - `LC_ALL` or `LC_MESSAGES` or `LANG` 情報バナーのロケール (例 `ja-JP`)
 - `TZ` 情報バナーのタイムゾーン (例 `Asia/Tokyo`)
+- `BARE_PUPPETEER` 実験的なモード。`puppeteer`にバンドルされるChromeを使用 (例: `1`)
 
 ### 動画の仕様とカスタマイズ
 
@@ -87,9 +89,9 @@ recording:
   headers: # HTTPリクエストヘッダ
   viewportWidth: 375 # ビューポート幅
   timeoutMs: 30000 # タイムアウト (単位 ms)
-  preferSystemChrome: false # Puppeteerバンドルのブラウザではなくインストール済みChromeを優先
+  preferSystemChrome: false # Puppeteerバンドルのブラウザではなくインストール済みChromeを優先 ※
   puppeteer: # puppeteerの設定 `PuppeteerLaunchOptions`
-    headless: 'new',
+    headless: true,
     args: # 文字列
       - '--hide-scrollbars'
 banner: # 情報バナー
@@ -109,6 +111,8 @@ rendering:
   outroMs: 1000 # 読み込み完了後の静止時間 (単位 ms)
   ffmpegArgs: # ffmpegへの追加オプション (文字列配列)
     # - "..."
+
+# recording.preferSystemChromeは環境変数BARE_PUPPETEER=1の場合のみ使用
 ```
 
 これらの値を必要に応じて一部上書きして、作成される動画をカスタマイズできます。値を上書きする方法はふたつあります。
@@ -131,15 +135,23 @@ layout:
 
 ### 使用するブラウザ
 
-`puppeteer`にバンドルされているChromeを利用します。
+インストール済みのChromeを自動で検索します。
 
-仕様オプションの`recording.preferSystemChrome`を`true`にすると、システムにChromeがインストールされている場合、それを優先して利用します。
+環境変数`CHROME_PATH`の指定がある場合、優先で適用します。
 
-環境変数`CHROME_PATH`の指定がある場合、最優先で適用します。以下はOSごとのシステムChromeの代表的なパスです。
+以下はOSごとのシステムChromeの代表的なパスです。
 
 - MacOS `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`
 - Windows `C:\Program Files\Google\Chrome\Application\chrome.exe`
 - Linux `/usr/bin/google-chrome`
+
+### puppeteerのブラウザは使用しないのか？
+
+`puppeteer`をインストールするとChromiumブラウザが`~/.cache`ディレクトリ以下にインストールされます。
+
+本来はこちらを使いたいところですが、環境によって動画の表示崩れが発生するため、Chromeの事前インストールをを必要としています。
+
+環境変数`BARE_PUPPETEER`に値(`1`など)を設定すると、実験的に`puppeteer`がバンドルしたブラウザを使用します。
 
 ### 情報バナーのカスタマイズ - 表示内容
 
@@ -280,3 +292,6 @@ yarn adhoc
 ### 残課題
 
 - テストとかかなり適当。
+- `puppeteer`にバンドルされるブラウザの積極利用。
+  - Chromeの事前インストールを不要にしたい。
+  - 環境変数`BARE_PUPPETEER`に値を設定することで試験可能。
