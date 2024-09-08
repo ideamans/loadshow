@@ -69,7 +69,7 @@ export interface LoadshowOutput {
 export async function runLoadshow(input: LoadshowInput, dependency: DependencyInterface): Promise<LoadshowOutput> {
   const timestampMs = Date.now()
 
-  dependency.logger?.info({}, `Starting loadshow ${input.url} on ${input.artifactsDirPath}`)
+  dependency.logger?.info({}, `Starting loadshow ${input.url}`)
   dependency.logger?.trace({ input }, `loadshow received input`)
 
   // Compute layout

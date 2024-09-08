@@ -1,5 +1,5 @@
 import Pino from 'pino'
-import { LaunchOptions, Page } from 'puppeteer-core'
+import { LaunchOptions, Page } from 'puppeteer'
 
 // Common types and interfaces
 
@@ -17,7 +17,11 @@ export interface DependencyInterface {
   writeStringFile(filePath: string, content: string): Promise<void>
   writeFile(filePath: string, buffer: Buffer): Promise<void>
   mkdirp(dirPath: string, recreate?: boolean): Promise<void>
-  withPuppeteer(puppeteerOptions: LaunchOptions, cb: (page: Page) => Promise<void>): Promise<void>
+  withPuppeteer(
+    preferSystemChrome: boolean,
+    puppeteerOptions: LaunchOptions,
+    cb: (page: Page) => Promise<void>
+  ): Promise<void>
   htmlToImage(html: string, outputFilePath: string): Promise<void>
   imageDimensions(imageFilePath: string): Promise<{ width: number; height: number }>
 }

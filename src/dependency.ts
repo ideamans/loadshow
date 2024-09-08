@@ -5,7 +5,7 @@ import { execa } from 'execa'
 import ImageSize from 'image-size'
 import NodeHtmlToImage from 'node-html-to-image'
 import Pino from 'pino'
-import Puppeteer, { LaunchOptions, Page } from 'puppeteer-core'
+import Puppeteer, { LaunchOptions, Page } from 'puppeteer'
 
 import { CommandOutput, DependencyInterface } from './types.js'
 
@@ -70,19 +70,32 @@ export class Dependency implements DependencyInterface {
     }
   }
 
-  async withPuppeteer(puppeteerOptions: LaunchOptions, cb: (page: Page) => Promise<void>): Promise<void> {
+  async withPuppeteer(
+    preferSystemChrome: boolean,
+    puppeteerOptions: LaunchOptions,
+    cb: (page: Page) => Promise<void>
+  ): Promise<void> {
     // Launch puppeteer and allow to manipulate the page tab
     const options = {
       ...puppeteerOptions,
     }
+
     if (process.env.CHROME_PATH) {
+      this.logger?.debug({}, `Using CHROME_PATH=${process.env.CHROME_PATH} as the browser`)
       options.executablePath = process.env.CHROME_PATH
-    } else {
-      options.executablePath = await computeSystemExecutablePath({
+    } else if (preferSystemChrome) {
+      const systemChrome = await computeSystemExecutablePath({
         browser: Browser.CHROME,
         channel: ChromeReleaseChannel.STABLE,
       })
+      if (systemChrome) {
+        this.logger?.debug({}, `Using browser system chrome: ${systemChrome} as the browser`)
+        options.executablePath = systemChrome
+      }
+    } else {
+      this.logger?.debug({}, `Using puppeteer's bundled chrome as the browser`)
     }
+
     const browser = await Puppeteer.launch(options)
     const page = await browser.newPage()
     await cb(page)

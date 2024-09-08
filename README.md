@@ -14,7 +14,6 @@
 ### 必要なソフトウェア
 
 - Node.js >= 20
-- Google Chrome (またはChromium)
 - ffmpeg
 
 ### インストール
@@ -59,21 +58,6 @@ loadshow juxtapose -o compare.mp4 apple.com.mp4 microsoft.com.mp4
 - `LC_ALL` or `LC_MESSAGES` or `LANG` 情報バナーのロケール (例 `ja-JP`)
 - `TZ` 情報バナーのタイムゾーン (例 `Asia/Tokyo`)
 
-### 外部アプリケーションのパス
-
-loadshowの実行にはGoogle Chromeとffmpegが必要です。
-
-環境変数`CHROME_PATH`の指定がなければ、プラットフォームに応じた代表的なChromeのパスを推測します。
-
-- MacOS `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`
-- Windows `C:\Program Files\Google\Chrome\Application\chrome.exe`
-- Linux `/usr/bin/google-chrome`
-
-> [!NOTE]
-> `puppeteer`と同時にインストールされるChromeでは、現時点では正常に動作しないためChromeの事前インストールを必要とします(後述)。
-
-ffmpegは`PATH`が通っていれば`FFMPEG_PATH`の指定は不要です。
-
 ### 動画の仕様とカスタマイズ
 
 動画の仕様は次のように構造化されたオブジェクトで規定されています。それぞれのデフォルト値とともに示します。
@@ -103,6 +87,7 @@ recording:
     headers: # HTTPリクエストヘッダ
     viewportWidth: 375 # ビューポート幅
     timeoutMs: 30000 # タイムアウト (単位 ms)
+    preferSystemChrome: false # Puppeteerバンドルのブラウザではなくインストール済みChromeを優先
     puppeteer: # puppeteerの設定 `PuppeteerLaunchOptions`
       headless: 'new',
       args: # 文字列
@@ -144,6 +129,18 @@ frameFormat: jpeg
 layout:
   canvasWidth: 500
 ```
+
+### 使用するブラウザ
+
+`puppeteer`にバンドルされているChromeを利用します。
+
+仕様オプションの`recording.preferSystemChrome`を`true`にすると、システムにChromeがインストールされている場合、それを優先して利用します。
+
+環境変数`CHROME_PATH`の指定がある場合、最優先で適用します。以下はOSごとのシステムChromeの代表的なパスです。
+
+- MacOS `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`
+- Windows `C:\Program Files\Google\Chrome\Application\chrome.exe`
+- Linux `/usr/bin/google-chrome`
 
 ### API
 

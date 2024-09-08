@@ -23,7 +23,12 @@ export const Lexicon = {
   })
 
   Handlebars.registerHelper('datetime', (value: string | number) => {
-    return new Date(Number(value)).toLocaleString(locale, { timeZone: tz })
+    const d = new Date(Number(value))
+    try {
+      return d.toLocaleString(locale, { timeZone: tz })
+    } catch (err) {
+      return d.toLocaleString()
+    }
   })
 
   Handlebars.registerHelper('mb', (value: string | number) => {
