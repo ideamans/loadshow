@@ -85,8 +85,10 @@ export async function renderVideo(
     input.timelineFilePath,
     '-vsync',
     'vfr',
-    // '-pix_fmt',
-    // 'yuv420p',
+    '-c:v',
+    'libx264',
+    '-pix_fmt',
+    'yuv420p',
     ...input.ffmpegArgs,
     input.videoFilePath,
   ]

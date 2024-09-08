@@ -59,7 +59,6 @@ export class Dependency implements DependencyInterface {
   async ffmpeg(args: string[]): Promise<CommandOutput> {
     this.logger?.trace({ args }, `Executing ffmpeg`)
     let ffmpegPath = process.env.FFMPEG_PATH || 'ffmpeg'
-    if (process.platform === 'win32') ffmpegPath += '.exe'
     const output = await execa(ffmpegPath, args, {
       reject: false,
     })
