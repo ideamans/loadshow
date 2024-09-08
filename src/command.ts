@@ -19,6 +19,10 @@ function helpAndExit(cmd: Command, message: string) {
   process.exit(1)
 }
 
+function createDependency() {
+  return process.env.BARE_PUPPETEER ? new DependencyWithPuppeteer() : new Dependency()
+}
+
 const record = program
   .command('record')
   .description('Record loading video of the URL')
@@ -32,7 +36,7 @@ const record = program
       helpAndExit(record, 'URL and artifactsDir are required')
     }
 
-    const dependency = process.env.USE_PUPPETEER ? new DependencyWithPuppeteer() : new Dependency()
+    const dependency = createDependency()
 
     const userSpec: SpecObject = {}
     const defaultSpec = defaultLoadshowSpec()
@@ -99,8 +103,7 @@ const juxtapose = program
 
     const outputFilePath = output as string
 
-    const dependency = process.env.USE_PUPPETEER ? new DependencyWithPuppeteer() : new Dependency()
-
+    const dependency = createDependency()
     await runJuxtapose(
       {
         inputFilePaths,

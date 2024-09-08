@@ -1,13 +1,6 @@
 import { Page } from 'puppeteer-core'
 
-import {
-  DeepPartial,
-  defaultCorePuppeteerLaunchOptions,
-  defaultPuppeteerLaunchOptions,
-  DependencyInterface,
-  DualLaunchOptions,
-  FrameFormat,
-} from './types.js'
+import { DeepPartial, DependencyInterface, DualLaunchOptions, FrameFormat } from './types.js'
 
 export interface RecordingSpec {
   network: {
@@ -24,7 +17,17 @@ export interface RecordingSpec {
 }
 
 export function defaultRecordingSpec(): RecordingSpec {
-  const puppeteer = process.env.USE_PUPPETEER ? defaultPuppeteerLaunchOptions : defaultCorePuppeteerLaunchOptions
+  const defaultPuppeteerLaunchOptions = {
+    headless: 'new',
+    args: ['--scrollbars'],
+  }
+
+  const defaultCorePuppeteerLaunchOptions = {
+    headless: true,
+    args: ['--scrollbars'],
+  }
+
+  const puppeteer = process.env.BARE_PUPPETEER ? defaultPuppeteerLaunchOptions : defaultCorePuppeteerLaunchOptions
 
   return {
     network: {
@@ -43,7 +46,7 @@ export function defaultRecordingSpec(): RecordingSpec {
     viewportWidth: 375, // Viewport width in pixels
     timeoutMs: 30 * 1000, // Navigation timeout in milliseconds
     preferSystemChrome: false, // Use system Chrome if available
-    puppeteer,
+    puppeteer: puppeteer as DualLaunchOptions,
   }
 }
 
@@ -145,8 +148,10 @@ export async function recordPageLoading(
       const cdp = await page.createCDPSession()
 
       // It seems to be good to set window bounds after viewport setting
-      const { windowId } = await cdp.send('Browser.getWindowForTarget')
-      await cdp.send('Browser.setWindowBounds', { windowId, bounds: viewport })
+      if (process.platform !== 'darwin') {
+        const { windowId } = await cdp.send('Browser.getWindowForTarget')
+        await cdp.send('Browser.setWindowBounds', { windowId, bounds: viewport })
+      }
 
       // Network settings
       dependency.logger?.debug({}, `Setting up network conditions via CDP`)

@@ -27,7 +27,7 @@ export class Dependency implements DependencyInterface {
     })
   }
 
-  withSubLogger(ns: string): Dependency {
+  withSubLogger(ns: string) {
     const dependency = new Dependency(`${ns}: `)
     return dependency
   }
@@ -59,7 +59,7 @@ export class Dependency implements DependencyInterface {
 
   async ffmpeg(args: string[]): Promise<CommandOutput> {
     this.logger?.trace({ args }, `Executing ffmpeg`)
-    let ffmpegPath = process.env.FFMPEG_PATH || 'ffmpeg'
+    const ffmpegPath = process.env.FFMPEG_PATH || 'ffmpeg'
     const output = await execa(ffmpegPath, args, {
       reject: false,
     })
@@ -70,11 +70,7 @@ export class Dependency implements DependencyInterface {
     }
   }
 
-  async withPuppeteer(
-    puppeteerOptions: DualLaunchOptions,
-    cb: (page: DualPage) => Promise<void>,
-    _?: boolean
-  ): Promise<void> {
+  async withPuppeteer(puppeteerOptions: DualLaunchOptions, cb: (page: DualPage) => Promise<void>): Promise<void> {
     // Launch puppeteer and allow to manipulate the page tab
     const options: DualLaunchOptions = {
       ...puppeteerOptions,
@@ -124,10 +120,15 @@ export class Dependency implements DependencyInterface {
 }
 
 export class DependencyWithPuppeteer extends Dependency {
+  withSubLogger(ns: string) {
+    const dependency = new DependencyWithPuppeteer(`${ns}: `)
+    return dependency
+  }
+
   async withPuppeteer(
     puppeteerOptions: DualLaunchOptions,
     cb: (page: DualPage) => Promise<void>,
-    preferSystemChrome: boolean
+    preferSystemChrome?: boolean
   ): Promise<void> {
     // Launch puppeteer and allow to manipulate the page tab
     const options: DualLaunchOptions = {

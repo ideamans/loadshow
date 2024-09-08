@@ -1,6 +1,6 @@
 import Pino from 'pino'
-import { PuppeteerLaunchOptions, Page } from 'puppeteer'
-import { PuppeteerLaunchOptions as CorePuppeteerLaunchOptions, Page as CorePage } from 'puppeteer-core'
+import { Page, PuppeteerLaunchOptions } from 'puppeteer'
+import { Page as CorePage, PuppeteerLaunchOptions as CorePuppeteerLaunchOptions } from 'puppeteer-core'
 
 // Common types and interfaces
 
@@ -40,13 +40,3 @@ export type DeepPartial<T> = {
 }
 
 export type FrameFormat = 'png' | 'jpeg'
-
-export const defaultPuppeteerLaunchOptions: PuppeteerLaunchOptions = {
-  headless: 'new',
-  args: ['--scrollbars'],
-}
-
-export const defaultCorePuppeteerLaunchOptions: CorePuppeteerLaunchOptions = {
-  headless: true,
-  args: ['--scrollbars'],
-}
