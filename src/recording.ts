@@ -136,9 +136,13 @@ export async function recordPageLoading(
     async (page: Page) => {
       dependency.logger?.debug({}, `Setting up viewport and headers`)
       const deviceScaleFactor = input.screen.width / input.viewportWidth
+      // FIXME: Extra height is needed for Linux
+      // In linux, the height of screencast is little bit smaller than
+      // the calculated value. So we need to add extra height to fit the windows.
+      const extraHeight = process.platform === 'linux' ? 1.1 : 1
       const viewport = {
         width: input.viewportWidth,
-        height: Math.ceil(input.screen.height / deviceScaleFactor),
+        height: Math.ceil((input.screen.height / deviceScaleFactor) * extraHeight),
       }
 
       await page.setViewport({ ...viewport, deviceScaleFactor })
@@ -147,8 +151,8 @@ export async function recordPageLoading(
       dependency.logger?.debug({}, `Creating CDP session in puppeteer`)
       const cdp = await page.createCDPSession()
 
-      // It seems to be good to set window bounds after viewport setting
-      if (process.platform !== 'darwin') {
+      // It seems to be good to set window bounds after viewport setting in linux.
+      if (process.platform === 'linux') {
         const { windowId } = await cdp.send('Browser.getWindowForTarget')
         await cdp.send('Browser.setWindowBounds', { windowId, bounds: viewport })
       }
