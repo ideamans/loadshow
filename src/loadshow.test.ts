@@ -47,12 +47,31 @@ test('loadshow', async (t) => {
     await Tmp.withDir(
       async ({ path }) => {
         const spec = defaultLoadshowSpec()
+        const steps: string[] = []
         const input: LoadshowInput = {
           ...spec,
           url: `http://localhost:${port}`,
           artifactsDirPath: path,
           videoFilePath: Path.join(path, 'loadshow.mp4'),
+          progressListener: {
+            afterCalculateLayout: () => {
+              steps.push('afterCalculateLayout')
+            },
+            afterRecordPageLoading: () => {
+              steps.push('afterRecordPageLoading')
+            },
+            afterCreateBanner: () => {
+              steps.push('afterCreateBanner')
+            },
+            afterComposeFrames: () => {
+              steps.push('afterComposeFrames')
+            },
+            afterRenderVideo: () => {
+              steps.push('afterRenderVideo')
+            },
+          },
         }
+
         await runLoadshow(input, dependency)
 
         t.true(Fs.existsSync(Path.join(path, 'banner.html')))
@@ -61,6 +80,14 @@ test('loadshow', async (t) => {
         t.true(Fs.existsSync(Path.join(path, 'ffmpeg.args.txt')))
         t.true(Fs.existsSync(Path.join(path, 'timeline.txt')))
         t.true(Fs.existsSync(input.videoFilePath))
+
+        t.deepEqual(steps, [
+          'afterCalculateLayout',
+          'afterRecordPageLoading',
+          'afterCreateBanner',
+          'afterComposeFrames',
+          'afterRenderVideo',
+        ])
       },
       { unsafeCleanup: true }
     )

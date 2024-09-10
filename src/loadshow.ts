@@ -1,17 +1,32 @@
 import Path from 'path'
 
 import { BannerOutput, BannerSpec, ContextVars, createBanner, defaultBannerSpec, mergeBannerSpec } from './banner.js'
-import { compositeFrames, CompositionSpec, defaultCompositionSpec, mergeCompositionSpec } from './composition.js'
-import { computeLayout, defaultLayoutSpec, LayoutSpec, mergeLayoutSpec } from './layout.js'
+import {
+  compositeFrames,
+  CompositionInput,
+  CompositionOutput,
+  CompositionSpec,
+  defaultCompositionSpec,
+  mergeCompositionSpec,
+} from './composition.js'
+import { computeLayout, defaultLayoutSpec, LayoutInput, LayoutOutput, LayoutSpec, mergeLayoutSpec } from './layout.js'
 import {
   defaultRecordingSpec,
   mergeRecordingSpec,
+  RecordingOutput,
   RecordingSpec,
   recordPageLoading,
   ResourcesLoading,
   Timing,
 } from './recording.js'
-import { defaultRenderingSpec, mergeRenderingSpec, RenderingSpec, renderVideo } from './rendering.js'
+import {
+  defaultRenderingSpec,
+  mergeRenderingSpec,
+  RenderingInput,
+  RenderingOutput,
+  RenderingSpec,
+  renderVideo,
+} from './rendering.js'
 import { DeepPartial, DependencyInterface, FrameFormat } from './types.js'
 
 export interface LoadshowSpec {
@@ -44,6 +59,13 @@ export interface LoadshowInput extends LoadshowSpec {
   url: string
   videoFilePath: string
   artifactsDirPath: string
+  progressListener?: {
+    afterCalculateLayout?: (input: LayoutInput, output: LayoutOutput) => void
+    afterRecordPageLoading?: (input: RecordingSpec, output: RecordingOutput) => void
+    afterCreateBanner?: (input: BannerSpec, output: BannerOutput) => void
+    afterComposeFrames?: (input: CompositionInput, output: CompositionOutput) => void
+    afterRenderVideo?: (input: RenderingInput, output: RenderingOutput) => void
+  }
 }
 
 export function mergeLoadshowSpec(base: LoadshowSpec, optional?: DeepPartial<LoadshowSpec>): LoadshowSpec {
@@ -78,6 +100,7 @@ export async function runLoadshow(input: LoadshowInput, dependency: DependencyIn
   const layoutInput = { ...layoutSpec }
   const layoutOutput = computeLayout({ ...layoutSpec }, dependency.withSubLogger('layout'))
   dependency.logger?.trace({ layoutOutput }, `computeLayout returned layoutOutput`)
+  input.progressListener?.afterCalculateLayout?.(layoutInput, layoutOutput)
 
   // Web page screen recording
   dependency.logger?.info({}, `Recording web page loading`)
@@ -95,6 +118,7 @@ export async function runLoadshow(input: LoadshowInput, dependency: DependencyIn
     delete loggingOutput.screenFrames // screenFrames is too large
     dependency.logger?.trace({ recordingOutput: loggingOutput }, `recordPageLoading returned recordingOutput`)
   }
+  input.progressListener?.afterRecordPageLoading?.(recordingInput, recordingOutput)
 
   // Generate banner
   let bannerOutput: BannerOutput | undefined
@@ -118,6 +142,7 @@ export async function runLoadshow(input: LoadshowInput, dependency: DependencyIn
     }
     bannerOutput = await createBanner(bannerInput, dependency.withSubLogger('banner'))
     dependency.logger?.trace({ bannerOutput }, `createBanner returned bannerOutput`)
+    input.progressListener?.afterCreateBanner?.(bannerInput, bannerOutput)
   }
 
   // Compose screens and banner to frames
@@ -139,6 +164,7 @@ export async function runLoadshow(input: LoadshowInput, dependency: DependencyIn
   }
   const compositionOutput = await compositeFrames(compositionInput, dependency.withSubLogger('composition'))
   dependency.logger?.trace({ compositionOutput }, `composeFrames returned compositionOutput`)
+  input.progressListener?.afterComposeFrames?.(compositionInput, compositionOutput)
 
   // Render frames to video
   dependency.logger?.info({}, `Rendering video file`)
@@ -153,6 +179,7 @@ export async function runLoadshow(input: LoadshowInput, dependency: DependencyIn
   }
   const renderingOutput = await renderVideo(renderingInput, dependency.withSubLogger('rendering'))
   dependency.logger?.trace({ renderingOutput }, `renderVideo returned renderingOutput`)
+  input.progressListener?.afterRenderVideo?.(renderingInput, renderingOutput)
 
   dependency.logger?.info(
     {
