@@ -71,11 +71,19 @@ export function splitQuotedStrings(value: string): string[] {
   return result
 }
 
-export function updateDeepProperty(obj: SpecObject, keyPath: string, value: SpecValue, reference: SpecObject) {
+export function updateDeepProperty(
+  obj: SpecObject,
+  keyPath: string,
+  value: SpecValue,
+  reference: SpecObject,
+  forcePrefixes: string[] = []
+) {
   const defaultValue = getProperty(reference, keyPath)
 
-  if (defaultValue === undefined || defaultValue === null) {
-    throw new Error(`No such key ${keyPath} in spec`)
+  if (!forcePrefixes.some((prefix) => keyPath.startsWith(prefix))) {
+    if (defaultValue === undefined || defaultValue === null) {
+      throw new Error(`No such key ${keyPath} in spec`)
+    }
   }
 
   if (typeof defaultValue === 'string') {
@@ -98,7 +106,8 @@ export function updateDeepProperty(obj: SpecObject, keyPath: string, value: Spec
     const newValues = [...defaultValue, ...values.map((v) => v.trim())]
     setProperty(obj, keyPath, newValues)
   } else {
-    throw new Error(`Unsupported type of ${keyPath}: ${typeof defaultValue}`)
+    // If defaultValue is undefined, reaching here means the key has forcePrefix
+    setProperty(obj, keyPath, value)
   }
 }
 
@@ -111,11 +120,16 @@ export function parseSpecPhrase(phrase: string): [string, string] {
   return [phrase.slice(0, equalIndex), phrase.slice(equalIndex + 1)]
 }
 
-export function mergeDeepProperties(obj: SpecObject, merge: SpecObject, reference: SpecObject) {
+export function mergeDeepProperties(
+  obj: SpecObject,
+  merge: SpecObject,
+  reference: SpecObject,
+  forcePrefixes: string[] = []
+) {
   // Update values in the object recursively
   function walk(paths: string[], value: SpecLike) {
     if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' || Array.isArray(value)) {
-      updateDeepProperty(obj, paths.join('.'), value, reference)
+      updateDeepProperty(obj, paths.join('.'), value, reference, forcePrefixes)
     } else if (typeof value === 'object') {
       for (const [k, v] of Object.entries(value)) {
         walk([...paths, k], v)

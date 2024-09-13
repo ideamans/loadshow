@@ -51,9 +51,13 @@ test('updateDeepProperty', (t) => {
       number: ['a', 'b', 'c'],
       boolean: ['a', 'b', 'c'],
     },
+    stringsMap: {
+      force: {},
+    },
   }
 
   const obj: SpecObject = {}
+  const forcePrefixes = ['stringsMap.force.']
 
   updateDeepProperty(obj, 'string', 'new string', reference)
   updateDeepProperty(obj, 'number', 10, reference)
@@ -76,6 +80,9 @@ test('updateDeepProperty', (t) => {
   updateDeepProperty(obj, 'stringsOnly.number', 30, reference)
   updateDeepProperty(obj, 'stringsOnly.boolean', true, reference)
 
+  // With forcePrefixes
+  updateDeepProperty(obj, 'stringsMap.force.string', 'new string', reference, forcePrefixes)
+
   t.deepEqual(obj, {
     string: 'new string',
     number: 10,
@@ -93,6 +100,11 @@ test('updateDeepProperty', (t) => {
       string: ['a', 'b', 'c', 'x', 'y', 'z'],
       number: ['a', 'b', 'c', '30'],
       boolean: ['a', 'b', 'c', 'true'],
+    },
+    stringsMap: {
+      force: {
+        string: 'new string',
+      },
     },
   })
 })
@@ -143,10 +155,16 @@ test('mergeDeepProperties', (t) => {
       number: ['30', '35'],
       boolean: ['true', 'false'],
     },
+    stringsMap: {
+      force: {
+        string: 'new string 2',
+      },
+    },
   }
 
   const obj: SpecObject = {}
-  mergeDeepProperties(obj, merge, reference)
+  const forcePrefixes = ['stringsMap.force']
+  mergeDeepProperties(obj, merge, reference, forcePrefixes)
 
   t.deepEqual(obj, {
     string: 'new string',
@@ -165,6 +183,11 @@ test('mergeDeepProperties', (t) => {
       string: ['a', 'b', 'c', 'x', 'y', 'z'],
       number: ['a', 'b', 'c', '30', '35'],
       boolean: ['a', 'b', 'c', 'true', 'false'],
+    },
+    stringsMap: {
+      force: {
+        string: 'new string 2',
+      },
     },
   })
 })

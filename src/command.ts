@@ -49,12 +49,14 @@ const record = program
     const userSpec: SpecObject = {}
     const defaultSpec = defaultLoadshowSpec()
 
+    const forceMergeSpecPrefixes = ['recording.headers.']
+
     // Options from YAML file
     if (options.merge && typeof options.merge === 'string') {
       const yaml = await dependency.readStringFile(options.merge)
       try {
         const opts = Yaml.parse(yaml)
-        mergeDeepProperties(userSpec, opts, defaultSpec as unknown as SpecObject)
+        mergeDeepProperties(userSpec, opts, defaultSpec as unknown as SpecObject, forceMergeSpecPrefixes)
       } catch (err) {
         dependency.logger?.fatal({ err }, `Failed to parse ${options.merge} as YAML: ${err.message}`)
         process.exit(1)
@@ -66,7 +68,7 @@ const record = program
       for (const u of Array.isArray(options.update) ? options.update : [options.update]) {
         try {
           const [k, v] = parseSpecPhrase(u)
-          updateDeepProperty(userSpec, k, v, defaultSpec as unknown as SpecObject)
+          updateDeepProperty(userSpec, k, v, defaultSpec as unknown as SpecObject, forceMergeSpecPrefixes)
         } catch (ex) {
           dependency.logger?.warn({}, ex.message)
         }
