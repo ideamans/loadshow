@@ -1,6 +1,6 @@
 {
   "name": "loadshow",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "type": "module",
   "description": "CLI tool to record a web page loading process as a video file.",
   "main": "dist/index.js",

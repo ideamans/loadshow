@@ -27,7 +27,15 @@ const record = program
   .command('record')
   .description('Record loading video of the URL')
   .option('-m, --merge <path>', 'Path to the options YAML file')
-  .option('-u, --update <key=value>', 'Update spec (multiple)')
+  .option<string[]>(
+    '-u, --update <key=value>',
+    'Update spec (multiple)',
+    (v, a) => {
+      a.push(v)
+      return a
+    },
+    []
+  )
   .option('-a, --artifacts <artifactsDir>', 'Artifacts directory path (default to tmp dir)')
   .argument('<url>', 'URL to record')
   .argument('<videoFilePath>', 'Working directory path')
