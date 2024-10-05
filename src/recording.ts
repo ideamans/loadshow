@@ -87,6 +87,7 @@ export interface RecordingInput extends RecordingSpec {
   frameQuality: number
   screen: { width: number; height: number }
   url: string
+  timingFilePath: string
 }
 
 export interface ResourcesLoading {
@@ -121,7 +122,7 @@ export interface RecordingOutput {
 
 export async function recordPageLoading(
   input: RecordingInput,
-  dependency: Pick<DependencyInterface, 'logger' | 'withPuppeteer'>
+  dependency: Pick<DependencyInterface, 'logger' | 'withPuppeteer' | 'writeStringFile'>
 ): Promise<RecordingOutput> {
   dependency.logger?.trace({ input }, `recordPageLoading received input`)
 
@@ -303,6 +304,9 @@ export async function recordPageLoading(
   // Force to set the last frame resources loading to the total
   const lastFrame = output.screenFrames[output.screenFrames.length - 1]
   lastFrame.resourcesLoading = { ...output.totalResourcesLoading }
+
+  // Write timing to a file
+  await dependency.writeStringFile(input.timingFilePath, JSON.stringify(output.timing, null, 2))
 
   return output
 }

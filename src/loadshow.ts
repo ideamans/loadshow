@@ -111,6 +111,7 @@ export async function runLoadshow(input: LoadshowInput, dependency: DependencyIn
     frameQuality: input.frameQuality,
     url: input.url,
     screen: { ...layoutOutput.scroll },
+    timingFilePath: Path.join(input.artifactsDirPath, 'timing.json'),
   }
   const recordingOutput = await recordPageLoading(recordingInput, dependency.withSubLogger('recording'))
   {
