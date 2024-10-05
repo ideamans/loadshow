@@ -59,6 +59,7 @@ loadshow juxtapose -o compare.mp4 apple.com.mp4 microsoft.com.mp4
 - `LC_ALL` or `LC_MESSAGES` or `LANG` 情報バナーのロケール (例 `ja-JP`)
 - `TZ` 情報バナーのタイムゾーン (例 `Asia/Tokyo`)
 - `BARE_PUPPETEER` 実験的なモード。`puppeteer`にバンドルされるChromeを使用 (例: `1`)
+- `LOG_OBJECTS` ログに付帯されたオブジェクトを表示する。
 
 ### 動画の仕様とカスタマイズ
 
@@ -84,7 +85,6 @@ recording:
     latencyMs: 20 # レイテンシー (単位 ms)
     downloadThroughputMbps: 10 # ダウンロードスループット (単位 Mbps)
     uploadThroughputMbps: 10 # アップロードスループット (単位 Mbps)
-  },
   cpuThrottling: 4 # CPUスロットリング (スマホ相当にするため4 = 性能1/4)
   headers: # HTTPリクエストヘッダ
   viewportWidth: 375 # ビューポート幅
