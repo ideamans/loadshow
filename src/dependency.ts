@@ -22,6 +22,7 @@ export class Dependency implements DependencyInterface {
         options: {
           colorize: true,
           ignore: 'pid,hostname',
+          hideObject: !Boolean(process.env.LOG_OBJECTS),
         },
       },
     })
