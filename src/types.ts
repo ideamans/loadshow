@@ -31,12 +31,14 @@ export interface DependencyInterface {
 }
 
 // To use workflow input makes deeply optional to merge into default values.
-export type DeepPartial<T> = {
-  [P in keyof T]?: T[P] extends (infer U)[]
-    ? DeepPartial<U>[]
-    : T[P] extends Record<string, unknown> | undefined
-    ? DeepPartial<T[P]>
-    : T[P]
-}
+export type DeepPartial<T> = T extends object
+  ? T extends Array<infer U>
+    ? Array<DeepPartial<U>>
+    : T extends Map<infer K, infer V>
+    ? Map<K, DeepPartial<V>>
+    : T extends Set<infer U>
+    ? Set<DeepPartial<U>>
+    : { [P in keyof T]?: DeepPartial<T[P]> }
+  : T
 
 export type FrameFormat = 'png' | 'jpeg'

@@ -25,5 +25,16 @@
       "outputCapture": "std",
       "skipFiles": ["<node_internals>/**/*.js"]
       // "smartStep": true
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug yarn adhoc",
+      "runtimeExecutable": "yarn",
+      "runtimeArgs": ["adhoc"],
+      "port": 9229,
+      "outputCapture": "std",
+      "skipFiles": ["<node_internals>/**/*.js"],
+      "cwd": "${workspaceFolder}"
     }]
 }
