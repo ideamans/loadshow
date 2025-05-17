@@ -1,4 +1,4 @@
-import { Page } from 'puppeteer-core'
+import { Page, TimeoutError } from 'puppeteer-core'
 
 import { DeepPartial, DependencyInterface, DualLaunchOptions, FrameFormat } from './types.js'
 
@@ -273,17 +273,25 @@ export async function recordPageLoading(
       try {
         // Start navigation to the url
         dependency.logger?.debug({}, `Starting page navigation`)
-        await page.goto(input.url, {
-          waitUntil: 'load',
-          timeout: input.timeoutMs,
-        })
+        try {
+          await page.goto(input.url, {
+            waitUntil: 'load',
+            timeout: input.timeoutMs,
+          })
+        } catch (ex) {
+          if (ex instanceof TimeoutError) {
+            dependency.logger?.warn({ err: ex }, `Timed out (${input.timeoutMs} ms) on navigation to ${input.url}`)
+          } else {
+            throw ex
+          }
+        }
 
         dependency.logger?.debug({}, `Stopping screencast and waiting to finish`)
         await cdp.send('Page.stopScreencast')
         // Wait for a while maybe the last frame is not captured
         await new Promise((ok) => setTimeout(ok, 500))
       } catch (err) {
-        dependency.logger?.error({ err }, `Failed to navigate to ${input.url}`)
+        dependency.logger?.error({ err }, `Failed to navigate to ${input.url}: ${err}`)
       } finally {
         dependency.logger?.debug({}, `Detaching CDP session`)
         await cdp.detach()
