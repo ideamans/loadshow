@@ -57,7 +57,7 @@ export async function adhocJuxtapose() {
       inputFilePaths: ['./tmp/video1.mp4', './tmp/video2.mp4'],
       outputFilePath: './tmp/output.mp4',
     },
-    dependency
+    dependency,
   )
   //
 }

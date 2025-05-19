@@ -11,7 +11,8 @@ import { defaultLoadshowSpec, LoadshowInput, runLoadshow } from './loadshow.js'
 
 test('loadshow', async (t) => {
   const dependency = new Dependency()
-  delete dependency.logger
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  dependency.logger = undefined as any
 
   const port = await GetPort()
   const server = Http.createServer((_, res) => {
@@ -89,7 +90,7 @@ test('loadshow', async (t) => {
           'afterRenderVideo',
         ])
       },
-      { unsafeCleanup: true }
+      { unsafeCleanup: true },
     )
   } finally {
     server.close()

@@ -59,7 +59,7 @@ export function computeLayout(input: LayoutSpec, dependency: Pick<DependencyInte
   dependency.logger?.trace({ input }, `computeLayout received input`)
 
   const columnWidth = Math.floor(
-    (input.canvasWidth - input.padding * 2 - input.gap * (input.columns - 1)) / input.columns
+    (input.canvasWidth - input.padding * 2 - input.gap * (input.columns - 1)) / input.columns,
   )
   const columns: Rectangle[] = []
   const windows: Window[] = []

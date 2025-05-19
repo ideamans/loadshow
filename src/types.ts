@@ -24,7 +24,7 @@ export interface DependencyInterface {
   withPuppeteer(
     puppeteerOptions: DualLaunchOptions,
     cb: (page: DualPage) => Promise<void>,
-    preferSystemChrome?: boolean
+    preferSystemChrome?: boolean,
   ): Promise<void>
   htmlToImage(html: string, outputFilePath: string): Promise<void>
   imageDimensions(imageFilePath: string): Promise<{ width: number; height: number }>
@@ -35,10 +35,10 @@ export type DeepPartial<T> = T extends object
   ? T extends Array<infer U>
     ? Array<DeepPartial<U>>
     : T extends Map<infer K, infer V>
-    ? Map<K, DeepPartial<V>>
-    : T extends Set<infer U>
-    ? Set<DeepPartial<U>>
-    : { [P in keyof T]?: DeepPartial<T[P]> }
+      ? Map<K, DeepPartial<V>>
+      : T extends Set<infer U>
+        ? Set<DeepPartial<U>>
+        : { [P in keyof T]?: DeepPartial<T[P]> }
   : T
 
 export type FrameFormat = 'png' | 'jpeg'

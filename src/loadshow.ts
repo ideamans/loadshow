@@ -115,8 +115,8 @@ export async function runLoadshow(input: LoadshowInput, dependency: DependencyIn
   }
   const recordingOutput = await recordPageLoading(recordingInput, dependency.withSubLogger('recording'))
   {
-    const loggingOutput = { ...recordingOutput }
-    delete loggingOutput.screenFrames // screenFrames is too large
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { screenFrames, ...loggingOutput } = { ...recordingOutput }
     dependency.logger?.trace({ recordingOutput: loggingOutput }, `recordPageLoading returned recordingOutput`)
   }
   input.progressListener?.afterRecordPageLoading?.(recordingInput, recordingOutput)
@@ -190,7 +190,7 @@ export async function runLoadshow(input: LoadshowInput, dependency: DependencyIn
       resources: recordingOutput.totalResourcesLoading,
       timing: recordingOutput.timing,
     },
-    'Finished loadshow'
+    'Finished loadshow',
   )
 
   return {

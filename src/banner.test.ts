@@ -40,7 +40,7 @@ test('createBanner - defaultTemplate', async (t) => {
         t.is(filePath, './tmp/banner.png')
         return { width: 512, height: 256 }
       },
-    }
+    },
   )
 
   t.deepEqual(output.renderedVars, expectedVars)
@@ -94,7 +94,7 @@ test('createBanner - custom template', async (t) => {
         t.is(filePath, './tmp/banner.png')
         return { width: 512, height: 256 }
       },
-    }
+    },
   )
 
   t.deepEqual(output.renderedVars, {

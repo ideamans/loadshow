@@ -37,7 +37,7 @@ export interface RenderingOutput {
 
 export async function renderVideo(
   input: RenderingInput,
-  dependency: Pick<DependencyInterface, 'logger' | 'writeStringFile' | 'ffmpeg'>
+  dependency: Pick<DependencyInterface, 'logger' | 'writeStringFile' | 'ffmpeg'>,
 ): Promise<RenderingOutput> {
   dependency.logger?.trace({ input }, `renderVideo received input`)
 
@@ -98,13 +98,13 @@ export async function renderVideo(
       .map((arg) => {
         return arg.includes(' ') ? `'${arg}'` : arg
       })
-      .join(' ')
+      .join(' '),
   )
   const ffmpegCommandOutput = await dependency.ffmpeg(ffmpegArgs)
   if (ffmpegCommandOutput.exitCode !== 0) {
     dependency.logger?.error(
       ffmpegCommandOutput,
-      `Failed to execute ffmpeg with exit code ${ffmpegCommandOutput.exitCode}`
+      `Failed to execute ffmpeg with exit code ${ffmpegCommandOutput.exitCode}`,
     )
     throw new Error(`Failed to render video: ${ffmpegCommandOutput.stderr}`)
   }

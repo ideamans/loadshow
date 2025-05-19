@@ -1,6 +1,6 @@
 import { Page, TimeoutError } from 'puppeteer-core'
 
-import { DeepPartial, DependencyInterface, DualLaunchOptions, FrameFormat } from './types.js'
+import { DeepPartial, DependencyInterface, DualLaunchOptions, DualPage, FrameFormat } from './types.js'
 
 export interface RecordingSpec {
   network: {
@@ -59,12 +59,12 @@ export function mergeRecordingSpec(base: RecordingSpec, optional?: DeepPartial<R
 
   const lowerCasedOptionalHeaders = Object.keys(optional?.headers || {}).reduce<{ [key: string]: string }>(
     (acc, key) => {
-      if (optional?.headers[key] !== undefined) {
+      if (optional?.headers?.[key] !== undefined) {
         acc[key.toLowerCase()] = optional?.headers[key]
       }
       return acc
     },
-    {}
+    {},
   )
 
   const puppeteer = {
@@ -122,7 +122,7 @@ export interface RecordingOutput {
 
 export async function recordPageLoading(
   input: RecordingInput,
-  dependency: Pick<DependencyInterface, 'logger' | 'withPuppeteer' | 'writeStringFile'>
+  dependency: Pick<DependencyInterface, 'logger' | 'withPuppeteer' | 'writeStringFile'>,
 ): Promise<RecordingOutput> {
   dependency.logger?.trace({ input }, `recordPageLoading received input`)
 
@@ -134,7 +134,8 @@ export async function recordPageLoading(
   dependency.logger?.debug({}, `Launching puppeteer`)
   await dependency.withPuppeteer(
     input.puppeteer,
-    async (page: Page) => {
+    async (p: DualPage) => {
+      const page = p as Page
       dependency.logger?.debug({}, `Setting up viewport and headers`)
       const deviceScaleFactor = input.screen.width / input.viewportWidth
       // FIXME: Extra height is needed for Linux
@@ -245,7 +246,7 @@ export async function recordPageLoading(
         dependency.logger?.trace({}, `Received screencast frame at ${f.metadata.timestamp}`)
 
         // Update onScreenFix time and push the frame
-        const time = Math.floor(f.metadata.timestamp * 1000) - startedAt
+        const time = Math.floor((f.metadata?.timestamp ?? 0) * 1000) - startedAt
         output.screenFrames.push({
           time,
           // Resources loading as placeholder
@@ -297,7 +298,7 @@ export async function recordPageLoading(
         await cdp.detach()
       }
     },
-    input.preferSystemChrome
+    input.preferSystemChrome,
   )
 
   dependency.logger?.debug({}, `Calculating frames metadata`)
@@ -306,6 +307,7 @@ export async function recordPageLoading(
   for (let i = 0; i < output.screenFrames.length; i++) {
     const frame = output.screenFrames[i]
     const resourcesLoading = resourcesLoadingHistories.filter((h) => h.timestampMs <= frame.time).pop()
+    if (!resourcesLoading) continue
     frame.resourcesLoading = { ...resourcesLoading }
   }
 
