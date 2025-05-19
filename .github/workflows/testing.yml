@@ -33,5 +33,7 @@ jobs:
         run: echo "PUPPETEER_SKIP_DOWNLOAD=1" >> $GITHUB_ENV
       - name: Install modules
         run: yarn cache clean && yarn install
+      - name: Adhoc script
+        run: LOG_LEVEL=debug yarn adhoc
       - name: Building & Testing
-        run: env && yarn test
+        run: yarn test

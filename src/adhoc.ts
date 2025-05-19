@@ -38,7 +38,7 @@ export async function adhocLoadshow() {
         'User-Agent':
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36',
       },
-      timeoutMs: 3 * 1000,
+      timeoutMs: 30 * 1000,
     },
   })
   const loadshowInput = {
