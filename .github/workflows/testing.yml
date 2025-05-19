@@ -24,6 +24,6 @@ jobs:
           cache: yarn
           registry-url: 'https://registry.npmjs.org'
       - name: Install modules
-        run: yarn cache clean && yarn install --verbose
+        run: yarn cache clean && yarn install --verbose --ignore-scripts
       - name: Building & Testing
         run: yarn test
