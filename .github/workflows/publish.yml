@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -12,19 +13,23 @@ jobs:
       packages: write
     steps:
       - uses: actions/checkout@v4
-      # - uses: browser-actions/setup-chrome@v1
-      - uses: FedericoCarboni/setup-ffmpeg@v3
+      - uses: AnimMouse/setup-ffmpeg@v1
+      - id: chrome
+        uses: browser-actions/setup-chrome@v1
         with:
-          ffmpeg-version: release
-          linking-type: static
-          github-token: ${{ github.server_url == 'https://github.com' && github.token || '' }}
+          chrome-version: latest
+          install-chromedriver: true
+      - name: Set CHROME_PATH
+        run: echo "CHROME_PATH=${{ steps.chrome.outputs.chrome-path }}" >> $GITHUB_ENV
       - uses: actions/setup-node@v4
         with:
           node-version: '20.x'
-          cache: npm
+          cache: yarn
           registry-url: 'https://registry.npmjs.org'
       - name: Install modules
-        run: yarn cache clean &&yarn install --verbose
+        run: yarn install
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: 1
       - name: Building & Testing
         run: yarn test
       - name: Publishing
