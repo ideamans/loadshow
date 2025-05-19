@@ -1,11 +1,11 @@
 {
   "name": "loadshow",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "type": "module",
   "description": "CLI tool to record a web page loading process as a video file.",
-  "main": "dist/index.js",
-  "typings": "dist/index.d.ts",
-  "module": "dist/index.js",
+  "main": "build/index.js",
+  "typings": "build/index.d.ts",
+  "module": "build/index.js",
   "repository": "https://github.com/ideamnas/loadshow",
   "license": "Apache-2.0",
   "keywords": [],
@@ -21,11 +21,11 @@
     "test:unit": "nyc --silent ava build/**/*.test.js",
     "watch": "nyc --silent ava --watch",
     "prepublishOnly": "run-s build",
-    "command": "yarn build && node dist/command.js",
-    "adhoc": "yarn build && node dist/adhoc.js"
+    "command": "yarn build && node build/command.js",
+    "adhoc": "yarn build && node build/adhoc.js"
   },
   "bin": {
-    "loadshow": "dist/command.js"
+    "loadshow": "build/command.js"
   },
   "engines": {
     "node": ">=20"
