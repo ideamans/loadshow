@@ -18,7 +18,7 @@
     "test:lint": "eslint src",
     "test:prettier": "prettier src --list-different",
     "test:cspell": "cspell \"{README.md,.github/*.md,src/**/*.ts}\"",
-    "test:unit": "TZ=UTC nyc --silent ava",
+    "test:unit": "nyc --silent ava build/**/*.test.js",
     "watch": "nyc --silent ava --watch",
     "prepublishOnly": "run-s build",
     "command": "yarn build && node dist/command.js",
@@ -80,7 +80,7 @@
       "TZ": "UTC"
     },
     "files": [
-      "!build/**"
+      "build/**"
     ]
   },
   "prettier": {
