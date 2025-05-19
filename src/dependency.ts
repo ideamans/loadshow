@@ -77,6 +77,8 @@ export class Dependency implements DependencyInterface {
       ...puppeteerOptions,
     }
 
+    console.log(`CHROME_PATH=${process.env.CHROME_PATH}`)
+
     if (process.env.CHROME_PATH) {
       this.logger?.debug({}, `Using CHROME_PATH=${process.env.CHROME_PATH} as the browser`)
       options.executablePath = process.env.CHROME_PATH
