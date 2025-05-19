@@ -50,7 +50,7 @@ test('loadshow', async (t) => {
         const spec = mergeLoadshowSpec(defaultLoadshowSpec(), {
           recording: {
             puppeteer: {
-              args: ['--no-sandbox', '--disable-setuid-sandbox'],
+              args: ['--no-sandbox'],
             },
           },
         })
