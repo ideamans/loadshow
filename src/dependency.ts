@@ -134,7 +134,7 @@ export class Dependency implements DependencyInterface {
     await NodeHtmlToImage({
       output: outputFilePath,
       html,
-      puppeteer: {
+      puppeteerArgs: {
         executablePath: chrome.path,
         args: puppeteerArgs,
       },
