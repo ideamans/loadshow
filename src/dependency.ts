@@ -1,4 +1,4 @@
-import Fsp from 'fs/promises'
+import Fsp from 'node:fs/promises'
 
 import { Browser, ChromeReleaseChannel, computeSystemExecutablePath } from '@puppeteer/browsers'
 import { execa } from 'execa'
@@ -22,7 +22,7 @@ export class Dependency implements DependencyInterface {
         options: {
           colorize: true,
           ignore: 'pid,hostname',
-          hideObject: !['', '0', 'false', 'no'].includes(process.env.LOG_OBJECTS?.toLowerCase()),
+          hideObject: !['', '0', 'false', 'no'].includes(process.env.LOG_OBJECTS?.toLowerCase() ?? ''),
         },
       },
     })
@@ -50,7 +50,7 @@ export class Dependency implements DependencyInterface {
       try {
         await Fsp.rm(dirPath, { recursive: true })
       } catch (ex) {
-        if (ex.code !== 'ENOENT') {
+        if (ex instanceof Error && 'code' in ex && ex.code !== 'ENOENT') {
           throw ex
         }
       }
@@ -65,7 +65,7 @@ export class Dependency implements DependencyInterface {
       reject: false,
     })
     return {
-      exitCode: output.exitCode,
+      exitCode: output.exitCode ?? 0,
       stdout: output.stdout,
       stderr: output.stderr,
     }
@@ -112,9 +112,12 @@ export class Dependency implements DependencyInterface {
 
   async imageDimensions(imageFilePath: string): Promise<{ width: number; height: number }> {
     return await new Promise<{ width: number; height: number }>((ok, ng) => {
-      ImageSize(imageFilePath, (err, { width, height }) => {
+      ImageSize(imageFilePath, (err, result) => {
         if (err) return ng(err)
-        else ok({ width, height })
+        if (!result) return ng(new Error(`ImageSize result is undefined`))
+        const { width, height } = result
+        if (width === undefined || height === undefined) return ng(new Error(`ImageSize result is undefined`))
+        ok({ width, height })
       })
     })
   }
@@ -129,7 +132,7 @@ export class DependencyWithPuppeteer extends Dependency {
   async withPuppeteer(
     puppeteerOptions: DualLaunchOptions,
     cb: (page: DualPage) => Promise<void>,
-    preferSystemChrome?: boolean
+    preferSystemChrome?: boolean,
   ): Promise<void> {
     // Launch puppeteer and allow to manipulate the page tab
     const options: DualLaunchOptions = {

@@ -76,7 +76,7 @@ export function updateDeepProperty(
   keyPath: string,
   value: SpecValue,
   reference: SpecObject,
-  forcePrefixes: string[] = []
+  forcePrefixes: string[] = [],
 ) {
   const defaultValue = getProperty(reference, keyPath)
 
@@ -124,7 +124,7 @@ export function mergeDeepProperties(
   obj: SpecObject,
   merge: SpecObject,
   reference: SpecObject,
-  forcePrefixes: string[] = []
+  forcePrefixes: string[] = [],
 ) {
   // Update values in the object recursively
   function walk(paths: string[], value: SpecLike) {

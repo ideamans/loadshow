@@ -34,12 +34,12 @@ file 'frame2.png'
 duration 2
 file 'frame2.png'
 duration 3
-file 'frame2.png'`
+file 'frame2.png'`,
         )
       } else if (filePath === './tmp/ffmpeg.args.txt') {
         t.is(
           content,
-          '-y -f concat -safe 0 -i ./tmp/timeline.txt -vsync vfr -c:v libx264 -pix_fmt yuv420p -custom -args ./tmp/video.mp4'
+          '-y -f concat -safe 0 -i ./tmp/timeline.txt -vsync vfr -c:v libx264 -pix_fmt yuv420p -custom -args ./tmp/video.mp4',
         )
       } else {
         t.fail(`Unexpected file path: ${filePath}`)

@@ -34,7 +34,7 @@ const record = program
       a.push(v)
       return a
     },
-    []
+    [],
   )
   .option('-a, --artifacts <artifactsDir>', 'Artifacts directory path (default to tmp dir)')
   .argument('<url>', 'URL to record')
@@ -58,7 +58,7 @@ const record = program
         const opts = Yaml.parse(yaml)
         mergeDeepProperties(userSpec, opts, defaultSpec as unknown as SpecObject, forceMergeSpecPrefixes)
       } catch (err) {
-        dependency.logger?.fatal({ err }, `Failed to parse ${options.merge} as YAML: ${err.message}`)
+        dependency.logger?.fatal({ err }, `Failed to parse ${options.merge} as YAML: ${err}`)
         process.exit(1)
       }
     }
@@ -70,7 +70,7 @@ const record = program
           const [k, v] = parseSpecPhrase(u)
           updateDeepProperty(userSpec, k, v, defaultSpec as unknown as SpecObject, forceMergeSpecPrefixes)
         } catch (ex) {
-          dependency.logger?.warn({}, ex.message)
+          dependency.logger?.warn({}, `${ex}`)
         }
       }
     }
@@ -95,7 +95,7 @@ const record = program
         await dependency.mkdirp(Path.dirname(videoFilePath))
         await runLoadshow(loadshowInput, dependency)
       },
-      { unsafeCleanup: true }
+      { unsafeCleanup: true },
     )
   })
 
@@ -119,7 +119,7 @@ const juxtapose = program
         inputFilePaths,
         outputFilePath,
       },
-      dependency
+      dependency,
     )
   })
 

@@ -17,14 +17,13 @@ jobs:
       - uses: FedericoCarboni/setup-ffmpeg@v3
         with:
           ffmpeg-version: release
-          linking-type: static
           github-token: ${{ github.server_url == 'https://github.com' && github.token || '' }}
       - uses: actions/setup-node@v4
         with:
           node-version: '20.x'
-          cache: npm
+          cache: yarn
           registry-url: 'https://registry.npmjs.org'
       - name: Install modules
-        run: yarn cache clean &&yarn install --verbose
+        run: yarn cache clean && yarn install --verbose
       - name: Building & Testing
         run: yarn test

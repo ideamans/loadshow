@@ -65,11 +65,12 @@ export interface CompositionOutput {
 
 export async function compositeFrames(
   input: CompositionInput,
-  dependency: Pick<DependencyInterface, 'logger' | 'writeFile'>
+  dependency: Pick<DependencyInterface, 'logger' | 'writeFile'>,
 ): Promise<CompositionOutput> {
   {
-    const loggingInput = { ...input }
-    delete loggingInput.screenFrames // screenFrames is too large
+    // Copy input to avoid logging too large screenFrames
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { screenFrames, ...loggingInput } = input
     dependency.logger?.trace({ input: loggingInput }, `compositeFrames received input`)
   }
 
@@ -212,13 +213,13 @@ export async function compositeFrames(
     // Put screen windows inside border rectangles
     dependency.logger?.debug({}, `Compositing screen windows on frame #${frame.time}`)
     const screen = Sharp(
-      await Sharp(Buffer.from(frame.base64Data, 'base64')).resize(input.layoutOutput.scroll.width).toBuffer()
+      await Sharp(Buffer.from(frame.base64Data, 'base64')).resize(input.layoutOutput.scroll.width).toBuffer(),
     )
     const screenDimensions = await screen.metadata()
 
     for (const window of input.layoutOutput.windows) {
-      const height = Math.min(window.height, screenDimensions.height - window.scrollTop)
-      const width = Math.min(window.width, screenDimensions.width)
+      const height = Math.min(window.height, (screenDimensions.height ?? 0) - window.scrollTop)
+      const width = Math.min(window.width, screenDimensions.width ?? 0)
       if (width <= 0 || height <= 0) break
 
       // Sharp object seems to be mutable so we need to clone it

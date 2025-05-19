@@ -3,7 +3,7 @@ import Handlebars from 'handlebars'
 import { DeepPartial, DependencyInterface } from './types.js'
 
 // i10n
-export const Lexicon = {
+export const Lexicon: Record<string, Record<string, string>> = {
   'ja-JP': {
     'Resource Size': 'リソースサイズ',
     'OnLoad Time': '読み込み時間 (OnLoad)',
@@ -27,6 +27,7 @@ export const Lexicon = {
     try {
       return d.toLocaleString(locale, { timeZone: tz })
     } catch (err) {
+      console.warn(err)
       return d.toLocaleString()
     }
   })
@@ -45,7 +46,7 @@ export const Lexicon = {
   })
 }
 
-export type FreeVars = { [key: string]: string | number }
+export type FreeVars = Record<string, string | number>
 
 export interface DefaultTemplateVars {
   bodyWidth: string
@@ -65,7 +66,7 @@ export interface ContextVars {
   htmlTitle: string
   timestampMs: number
   resourceSizeBytes: number
-  onLoadTimeMs: number
+  onLoadTimeMs?: number
 }
 
 export interface BannerSpec {
@@ -98,7 +99,7 @@ export function mergeBannerSpec(base: BannerSpec, optional?: DeepPartial<BannerS
   return {
     ...base,
     ...(optional ?? {}),
-    vars: { ...base.vars, ...(optional?.vars || {}) },
+    vars: { ...base.vars, ...(optional?.vars || {}) } as FreeVars | DefaultTemplateVars,
   }
 }
 
@@ -125,7 +126,7 @@ export async function createBanner(
   dependency: Pick<
     DependencyInterface,
     'logger' | 'readStringFile' | 'writeStringFile' | 'htmlToImage' | 'imageDimensions'
-  >
+  >,
 ) {
   dependency.logger?.trace({ input }, `createBanner received input`)
 
@@ -143,10 +144,7 @@ export async function createBanner(
         vars[key] = value
       }
     } catch (err) {
-      dependency.logger?.error(
-        { key, value, err },
-        `Failed to render the variable ${key}=${value} because of ${err.message}`
-      )
+      dependency.logger?.error({ key, value, err }, `Failed to render the variable ${key}=${value} because of ${err}`)
     }
     return vars
   }, {})

@@ -11,7 +11,7 @@ export interface JuxtaposeOutput {
 
 export async function runJuxtapose(
   input: JuxtaposeInput,
-  dependency: Pick<DependencyInterface, 'logger' | 'ffmpeg'>
+  dependency: Pick<DependencyInterface, 'logger' | 'ffmpeg'>,
 ): Promise<JuxtaposeOutput> {
   // Stack horizontally multiple videos to compare them side by side.
 
