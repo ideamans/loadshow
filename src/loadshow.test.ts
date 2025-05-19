@@ -7,7 +7,7 @@ import GetPort from 'get-port'
 import Tmp from 'tmp-promise'
 
 import { Dependency } from './dependency.js'
-import { defaultLoadshowSpec, LoadshowInput, runLoadshow } from './loadshow.js'
+import { defaultLoadshowSpec, LoadshowInput, mergeLoadshowSpec, runLoadshow } from './loadshow.js'
 
 test('loadshow', async (t) => {
   const dependency = new Dependency()
@@ -47,7 +47,16 @@ test('loadshow', async (t) => {
   try {
     await Tmp.withDir(
       async ({ path }) => {
-        const spec = defaultLoadshowSpec()
+        const spec = mergeLoadshowSpec(defaultLoadshowSpec(), {
+          recording: {
+            puppeteer: {
+              args: ['--no-sandbox'],
+            },
+          },
+          banner: {
+            puppeteerArgs: ['--no-sandbox'],
+          },
+        })
         const steps: string[] = []
         const input: LoadshowInput = {
           ...spec,

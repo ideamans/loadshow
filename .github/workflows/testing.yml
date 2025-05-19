@@ -13,17 +13,27 @@ jobs:
       packages: write
     steps:
       - uses: actions/checkout@v4
-      # - uses: browser-actions/setup-chrome@v1
       - uses: FedericoCarboni/setup-ffmpeg@v3
         with:
           ffmpeg-version: release
           github-token: ${{ github.server_url == 'https://github.com' && github.token || '' }}
+      - id: chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: latest
+          install-chromedriver: true
+      - name: Set CHROME_PATH
+        run: echo "CHROME_PATH=${{ steps.chrome.outputs.chrome-path }}" >> $GITHUB_ENV
       - uses: actions/setup-node@v4
         with:
           node-version: '20.x'
           cache: yarn
           registry-url: 'https://registry.npmjs.org'
+      - name: Set PUPPETEER_SKIP_DOWNLOAD env 1
+        run: echo "PUPPETEER_SKIP_DOWNLOAD=1" >> $GITHUB_ENV
       - name: Install modules
-        run: yarn cache clean && yarn install --verbose
+        run: yarn cache clean && yarn install
+      - name: Adhoc script
+        run: LOG_LEVEL=debug yarn adhoc
       - name: Building & Testing
         run: yarn test

@@ -73,6 +73,7 @@ export interface BannerSpec {
   templateFilePath: string
   htmlTemplate: string
   vars: FreeVars | DefaultTemplateVars
+  puppeteerArgs?: string[]
 }
 
 export function defaultBannerSpec() {
@@ -163,7 +164,7 @@ export async function createBanner(
   // Render to image
   dependency.logger?.trace({}, `Rendering HTML to image`)
   const outputFilePath = input.outputFilePath
-  await dependency.htmlToImage(renderedHtml, outputFilePath)
+  await dependency.htmlToImage(renderedHtml, outputFilePath, input.puppeteerArgs)
 
   // Banner image size
   dependency.logger?.debug({}, `Measuring the banner image size`)
