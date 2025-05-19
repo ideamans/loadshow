@@ -26,7 +26,7 @@ export interface DependencyInterface {
     cb: (page: DualPage) => Promise<void>,
     preferSystemChrome?: boolean,
   ): Promise<void>
-  htmlToImage(html: string, outputFilePath: string): Promise<void>
+  htmlToImage(html: string, outputFilePath: string, puppeteerArgs?: string[]): Promise<void>
   imageDimensions(imageFilePath: string): Promise<{ width: number; height: number }>
 }
 

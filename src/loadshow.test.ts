@@ -53,6 +53,9 @@ test('loadshow', async (t) => {
               args: ['--no-sandbox'],
             },
           },
+          banner: {
+            puppeteerArgs: ['--no-sandbox'],
+          },
         })
         const steps: string[] = []
         const input: LoadshowInput = {
