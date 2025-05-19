@@ -34,4 +34,4 @@ jobs:
       - name: Install modules
         run: yarn cache clean && yarn install
       - name: Building & Testing
-        run: yarn test
+        run: env && yarn test
