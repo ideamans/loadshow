@@ -13,10 +13,7 @@ jobs:
       packages: write
     steps:
       - uses: actions/checkout@v4
-      - uses: FedericoCarboni/setup-ffmpeg@v3
-        with:
-          ffmpeg-version: release
-          github-token: ${{ github.server_url == 'https://github.com' && github.token || '' }}
+      - uses: AnimMouse/setup-ffmpeg@v1
       - id: chrome
         uses: browser-actions/setup-chrome@v1
         with:
@@ -29,11 +26,9 @@ jobs:
           node-version: '20.x'
           cache: yarn
           registry-url: 'https://registry.npmjs.org'
-      - name: Set PUPPETEER_SKIP_DOWNLOAD env 1
-        run: echo "PUPPETEER_SKIP_DOWNLOAD=1" >> $GITHUB_ENV
       - name: Install modules
-        run: yarn cache clean && yarn install
-      - name: Adhoc script
-        run: LOG_LEVEL=debug yarn adhoc
+        run: yarn install
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: 1
       - name: Building & Testing
         run: yarn test
