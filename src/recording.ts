@@ -1,5 +1,12 @@
 import { Page, TimeoutError } from 'puppeteer-core'
 
+import {
+  defaultDeterministicOptions,
+  DeterministicOptions,
+  generateMaskScript,
+  getAllDeterministicScripts,
+  getDeterministicCSS,
+} from './deterministic.js'
 import { DeepPartial, DependencyInterface, DualLaunchOptions, DualPage, FrameFormat } from './types.js'
 
 export interface RecordingSpec {
@@ -14,6 +21,7 @@ export interface RecordingSpec {
   timeoutMs: number
   preferSystemChrome: boolean
   puppeteer: DualLaunchOptions
+  deterministic: DeterministicOptions
 }
 
 export function defaultRecordingSpec(): RecordingSpec {
@@ -47,6 +55,7 @@ export function defaultRecordingSpec(): RecordingSpec {
     timeoutMs: 30 * 1000, // Navigation timeout in milliseconds
     preferSystemChrome: false, // Use system Chrome if available
     puppeteer: puppeteer as DualLaunchOptions,
+    deterministic: defaultDeterministicOptions(),
   }
 }
 
@@ -79,6 +88,7 @@ export function mergeRecordingSpec(base: RecordingSpec, optional?: DeepPartial<R
     network: { ...base.network, ...(optional?.network ?? {}) },
     headers: { ...lowerCasedBaseHeaders, ...lowerCasedOptionalHeaders },
     puppeteer,
+    deterministic: { ...base.deterministic, ...(optional?.deterministic ?? {}) },
   }
 }
 
@@ -149,6 +159,24 @@ export async function recordPageLoading(
 
       await page.setViewport({ ...viewport, deviceScaleFactor })
       await page.setExtraHTTPHeaders(input.headers)
+
+      // Inject deterministic scripts if enabled
+      if (input.deterministic.enabled) {
+        dependency.logger?.debug({ deterministic: input.deterministic }, `Injecting deterministic scripts`)
+
+        const deterministicScripts = getAllDeterministicScripts(input.deterministic)
+        if (deterministicScripts) {
+          await page.evaluateOnNewDocument(deterministicScripts)
+        }
+
+        // Inject mask script if selectors are provided
+        if (input.deterministic.maskSelectors && input.deterministic.maskSelectors.length > 0) {
+          const maskScript = generateMaskScript(input.deterministic.maskSelectors)
+          if (maskScript) {
+            await page.evaluateOnNewDocument(maskScript)
+          }
+        }
+      }
 
       dependency.logger?.debug({}, `Creating CDP session in puppeteer`)
       const cdp = await page.createCDPSession()
@@ -269,6 +297,42 @@ export async function recordPageLoading(
         everyNthFrame: 1,
       })
 
+      // Inject deterministic CSS via CDP before navigation to prevent animations from starting
+      if (input.deterministic.enabled) {
+        const deterministicCSS = getDeterministicCSS(input.deterministic)
+        if (deterministicCSS) {
+          dependency.logger?.debug({}, `Injecting deterministic CSS via CDP before navigation`)
+          // Use CDP to inject CSS early, before any page content loads
+          await cdp.send('Page.addScriptToEvaluateOnNewDocument', {
+            source: `
+(function() {
+  const style = document.createElement('style');
+  style.textContent = ${JSON.stringify(deterministicCSS)};
+  // Inject into documentElement as soon as possible
+  if (document.documentElement) {
+    document.documentElement.appendChild(style);
+  } else {
+    // If documentElement doesn't exist yet, inject immediately when it does
+    Object.defineProperty(document, 'documentElement', {
+      configurable: true,
+      set: function(value) {
+        delete document.documentElement;
+        document.documentElement = value;
+        if (value) {
+          value.appendChild(style);
+        }
+      },
+      get: function() {
+        return this._documentElement;
+      }
+    });
+  }
+})();
+`,
+          })
+        }
+      }
+
       startedAt = Date.now()
 
       try {
@@ -286,6 +350,10 @@ export async function recordPageLoading(
             throw ex
           }
         }
+
+        dependency.logger?.debug({}, `Waiting 3 seconds after onload`)
+        // Wait 3 seconds after onload to capture animations and dynamic content
+        await new Promise((ok) => setTimeout(ok, 3000))
 
         dependency.logger?.debug({}, `Stopping screencast and waiting to finish`)
         await cdp.send('Page.stopScreencast')

@@ -37,6 +37,7 @@ const record = program
     [],
   )
   .option('-a, --artifacts <artifactsDir>', 'Artifacts directory path (default to tmp dir)')
+  .option('-d, --dynamic', 'Disable deterministic rendering (use original page behavior with animations, etc.)')
   .argument('<url>', 'URL to record')
   .argument('<videoFilePath>', 'Working directory path')
   .action(async (url: string, videoFilePath: string, options: { [key: string]: string | string[] }) => {
@@ -73,6 +74,11 @@ const record = program
           dependency.logger?.warn({}, `${ex}`)
         }
       }
+    }
+
+    // Apply --dynamic flag (disables deterministic rendering)
+    if (options.dynamic) {
+      updateDeepProperty(userSpec, 'recording.deterministic.enabled', false, defaultSpec as unknown as SpecObject, [])
     }
 
     await Tmp.withDir(
