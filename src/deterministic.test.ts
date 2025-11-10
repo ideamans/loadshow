@@ -25,6 +25,10 @@ test('defaultDeterministicOptions returns correct defaults', (t) => {
   t.true(options.fixIntersectionObserver)
   t.true(options.disableWebAnimations)
   t.deepEqual(options.maskSelectors, [])
+  t.deepEqual(options.blockUrls, [])
+  t.true(options.waitForFonts)
+  t.true(options.waitForImages)
+  t.deepEqual(options.waitSelectors, [])
 })
 
 test('getDeterministicCSS returns CSS when enabled and disableAnimations is true', (t) => {

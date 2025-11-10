@@ -274,6 +274,10 @@ export interface DeterministicOptions {
   fixIntersectionObserver?: boolean
   disableWebAnimations?: boolean
   maskSelectors?: string[]
+  blockUrls?: string[]
+  waitForFonts?: boolean
+  waitForImages?: boolean
+  waitSelectors?: string[]
 }
 
 /**
@@ -291,6 +295,10 @@ export function defaultDeterministicOptions(): DeterministicOptions {
     fixIntersectionObserver: true,
     disableWebAnimations: true,
     maskSelectors: [],
+    blockUrls: [],
+    waitForFonts: true,
+    waitForImages: true,
+    waitSelectors: [],
   }
 }
 

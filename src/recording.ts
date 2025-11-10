@@ -202,6 +202,12 @@ export async function recordPageLoading(
       dependency.logger?.debug({}, `Setting up CPU throttling via CDP`)
       await cdp.send('Emulation.setCPUThrottlingRate', { rate: input.cpuThrottling })
 
+      // Network route blocking for deterministic mode
+      if (input.deterministic.enabled && input.deterministic.blockUrls && input.deterministic.blockUrls.length > 0) {
+        dependency.logger?.debug({ blockUrls: input.deterministic.blockUrls }, `Setting up URL blocking`)
+        await cdp.send('Network.setBlockedURLs', { urls: input.deterministic.blockUrls })
+      }
+
       // Event listeners
       dependency.logger?.debug({}, `Setting event listeners`)
 
@@ -348,6 +354,50 @@ export async function recordPageLoading(
             dependency.logger?.warn({ err: ex }, `Timed out (${input.timeoutMs} ms) on navigation to ${input.url}`)
           } else {
             throw ex
+          }
+        }
+
+        // Wait for fonts to load if enabled
+        if (input.deterministic.enabled && input.deterministic.waitForFonts) {
+          dependency.logger?.debug({}, `Waiting for fonts to load`)
+          await page.evaluate(async () => {
+            if (document.fonts && document.fonts.status !== 'loaded') {
+              await document.fonts.ready
+            }
+          })
+        }
+
+        // Wait for images to load if enabled
+        if (input.deterministic.enabled && input.deterministic.waitForImages) {
+          dependency.logger?.debug({}, `Waiting for images to load`)
+          await page.evaluate(async () => {
+            const images = Array.from(document.images)
+            await Promise.all(
+              images
+                .filter((img) => !img.complete)
+                .map(
+                  (img) =>
+                    new Promise<void>((resolve) => {
+                      img.onload = img.onerror = () => resolve()
+                    }),
+                ),
+            )
+          })
+        }
+
+        // Wait for specific selectors if provided
+        if (
+          input.deterministic.enabled &&
+          input.deterministic.waitSelectors &&
+          input.deterministic.waitSelectors.length > 0
+        ) {
+          dependency.logger?.debug({ selectors: input.deterministic.waitSelectors }, `Waiting for selectors`)
+          for (const selector of input.deterministic.waitSelectors) {
+            try {
+              await page.waitForSelector(selector, { timeout: input.timeoutMs })
+            } catch {
+              dependency.logger?.warn({ selector }, `Failed to wait for selector: ${selector}`)
+            }
           }
         }
 
