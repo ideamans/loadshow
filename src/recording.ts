@@ -360,29 +360,40 @@ export async function recordPageLoading(
         // Wait for fonts to load if enabled
         if (input.deterministic.enabled && input.deterministic.waitForFonts) {
           dependency.logger?.debug({}, `Waiting for fonts to load`)
-          await page.evaluate(async () => {
-            if (document.fonts && document.fonts.status !== 'loaded') {
-              await document.fonts.ready
-            }
-          })
+          try {
+            await page.evaluate(async (timeout) => {
+              if (document.fonts && document.fonts.status !== 'loaded') {
+                await Promise.race([document.fonts.ready, new Promise((resolve) => setTimeout(resolve, timeout))])
+              }
+            }, 5000)
+          } catch {
+            dependency.logger?.warn({}, `Failed to wait for fonts`)
+          }
         }
 
         // Wait for images to load if enabled
         if (input.deterministic.enabled && input.deterministic.waitForImages) {
           dependency.logger?.debug({}, `Waiting for images to load`)
-          await page.evaluate(async () => {
-            const images = Array.from(document.images)
-            await Promise.all(
-              images
-                .filter((img) => !img.complete)
-                .map(
-                  (img) =>
-                    new Promise<void>((resolve) => {
-                      img.onload = img.onerror = () => resolve()
-                    }),
+          try {
+            await page.evaluate(async (timeout) => {
+              const images = Array.from(document.images)
+              await Promise.race([
+                Promise.all(
+                  images
+                    .filter((img) => !img.complete)
+                    .map(
+                      (img) =>
+                        new Promise<void>((resolve) => {
+                          img.onload = img.onerror = () => resolve()
+                        }),
+                    ),
                 ),
-            )
-          })
+                new Promise((resolve) => setTimeout(resolve, timeout)),
+              ])
+            }, 5000)
+          } catch {
+            dependency.logger?.warn({}, `Failed to wait for images`)
+          }
         }
 
         // Wait for specific selectors if provided
