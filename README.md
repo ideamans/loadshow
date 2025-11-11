@@ -49,6 +49,37 @@ loadshow juxtapose -o compare.mp4 apple.com.mp4 microsoft.com.mp4
 
 ## TIPS
 
+### 決定論的な記録（デフォルト）
+
+`loadshow`はデフォルトで**決定論的な記録**を行います。これは、Webページの読み込みを可能な限り再現可能にし、記録動画を比較しやすくするための機能です。
+
+**決定論的な記録で行われる処理:**
+
+- **アニメーションとトランジションの無効化** - CSSアニメーション、トランジション、Web Animations APIを停止
+- **時刻と乱数の固定化** - `Date.now()`, `Math.random()`, `performance.now()`を固定値に置き換え
+- **メディアの自動再生停止** - 動画・音声の自動再生を防止、カルーセルなどの自動スクロールも停止
+- **遅延読み込みの即時化** - IntersectionObserverをモックし、画面外の画像も即座に読み込み
+- **スクロール動作の無効化** - `scrollTo()`, `scrollIntoView()`などを無効化
+- **フォントと画像の読み込み待機** - すべてのフォントと画像の読み込み完了を待機（タイムアウト5秒）
+- **外部リソースのブロック** - 指定されたURLパターンの読み込みをブロック可能
+- **要素の出現待機** - SPAなどで動的に表示される要素のセレクタを指定して待機可能
+
+この機能により、動的な要素やアニメーションの影響を受けず、純粋な読み込み速度の比較が可能になります。
+
+### 動的な記録（-dオプション）
+
+従来の非決定論的な記録（アニメーションなどが動作する状態）を行いたい場合は、`-d`または`--dynamic`オプションを指定します。
+
+```bash
+# 決定論的な記録（デフォルト）
+loadshow record https://apple.com/ ./static.mp4
+
+# 動的な記録（アニメーションあり）
+loadshow record -d https://apple.com/ ./dynamic.mp4
+```
+
+動的な記録では、Webページの実際の挙動（アニメーション、自動再生、遅延読み込みなど）がそのまま記録されます。
+
 ### 環境変数
 
 次の項目を環境変数で指定できます。
@@ -94,6 +125,20 @@ recording:
     headless: true,
     args: # 文字列
       - '--hide-scrollbars'
+  deterministic: # 決定論的な記録の設定
+    enabled: true # 決定論的な記録を有効化 (デフォルト: true、-dオプションでfalse)
+    mockTime: '2025-01-01T00:00:00Z' # 固定する時刻
+    randomSeed: 42 # 乱数シード
+    disableAnimations: true # アニメーションを無効化
+    disableAutoplay: true # 自動再生を無効化
+    disableScroll: true # スクロールを無効化
+    fixIntersectionObserver: true # IntersectionObserverを即時実行
+    disableWebAnimations: true # Web Animations APIを無効化
+    maskSelectors: [] # 非表示にするセレクタのリスト
+    blockUrls: [] # ブロックするURLパターンのリスト
+    waitForFonts: true # フォント読み込み完了を待機
+    waitForImages: true # 画像読み込み完了を待機
+    waitSelectors: [] # 出現を待機するセレクタのリスト
 banner: # 情報バナー
   templateFilePath: "" # HTMLテンプレート (ファイル指定)
   htmlTemplate: "" # HTMLテンプレート (テキスト指定)
